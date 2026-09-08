@@ -14,7 +14,7 @@ export default function App() {
   useEffect(() => {
     const handleBeforeUnload = (event) => {
       event.preventDefault();
-      event.returnValue = "Yakin ingin keluar dari web?";
+      event.returnValue = "";
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);

@@ -14,6 +14,7 @@ export default function AdminRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
+
       <Route element={<AdminLayout />}>
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />

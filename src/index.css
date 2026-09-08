@@ -13,20 +13,33 @@ html {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   background: #f4f8ff;
+  color: #0f172a;
+  font-family: inherit;
 }
 
 button,
+a,
 input,
+textarea,
 select {
-  font: inherit;
+  font-family: inherit;
 }
 
 button {
   cursor: pointer;
+}
+
+a {
+  text-decoration: none;
+}
+
+#root {
+  min-height: 100vh;
 }
