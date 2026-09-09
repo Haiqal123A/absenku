@@ -1,0 +1,48 @@
+SOFTWARE ATTRIBUTION LICENSE
+KETENTUAN PENGGUNAAN & PEMBERIAN ATRIBUSI KODE SUMBER
+
+Hak Cipta (c) 2026:
+- Alif Alfathar
+- Denis Ali Fadilah
+- Rega Syakib Ramadhan
+Siswa SMK Taruna Bhakti — Proyek Praktik Kerja Lapangan (PKL)
+di Direktorat Bina Teknik Sumber Daya Air (Kementerian PUPR)
+
+================================================================================
+1. IZIN PENGGUNAAN & KLONING (PERMISSION TO CLONE & USE)
+================================================================================
+Dengan ini, izin diberikan secara bebas kepada siapa saja yang memperoleh salinan 
+dari repositori dan berkas kode sumber ini untuk:
+a. Melakukan kloning (git clone), mengunduh, membaca, dan mempelajari seluruh kode sumber.
+b. Menjalankan, menguji, dan menggunakan backend ini secara lokal untuk keperluan 
+   pembelajaran, edukasi, referensi, atau pengembangan lebih lanjut.
+c. Mengintegrasikan endpoint backend ini dengan antarmuka frontend untuk keperluan 
+   pengembangan aplikasi presensi.
+
+================================================================================
+2. PERSYARATAN WAJIB ATRIBUSI (MANDATORY ATTRIBUTION CONDITIONS)
+================================================================================
+Izin di atas diberikan dengan ketentuan dan SYARAT MUTLAK sebagai berikut:
+
+a. WAJIB MENCANTUMKAN LISENSI & KREDIT ASLI:
+   Setiap salinan, kloningan, fork, maupun bagian substansial dari kode sumber ini 
+   WAJIB tetap menyertakan pemberitahuan hak cipta di atas dan teks berkas LICENSE 
+   ini secara utuh tanpa diubah.
+
+b. DILARANG MENGAKU-AKU KEPEMILIKAN (ANTI-PLAGIARISME):
+   Pengguna DILARANG KERAS menghapus, memodifikasi, atau menyamarkan nama pemegang 
+   hak cipta asli (Alif Alfathar, Denis Ali Fadilah, Rega Syakib Ramadhan), serta 
+   dilarang mengklaim atau mempublikasikan ulang karya ini seolah-olah dibuat secara 
+   mandiri dari nol oleh pihak lain.
+
+c. PENGGUNAAN NON-KOMERSIAL (NON-COMMERCIAL):
+   Kode sumber ini tidak boleh diperjualbelikan, disewakan, atau dikomersialisasikan 
+   secara langsung tanpa persetujuan tertulis resmi dari para pencipta asli.
+
+================================================================================
+3. PENAFIAN TANGGUNG JAWAB (DISCLAIMER)
+================================================================================
+PERANGKAT LUNAK INI DISEDIAKAN "SEBAGAIMANA ADANYA" ("AS IS"), TANPA JAMINAN DALAM 
+BENTUK APA PUN, BAIK TERSURAT MAUPUN TERSIRAT. DALAM KEADAAN APA PUN, PARA PENCIPTA 
+ATAU PEMEGANG HAK CIPTA TIDAK BERTANGGUNG JAWAB ATAS KLAIM, KERUSAKAN, ATAU TUNTUTAN 
+LAINNYA YANG TIMBUL DARI PENGGUNAAN PERANGKAT LUNAK INI.
