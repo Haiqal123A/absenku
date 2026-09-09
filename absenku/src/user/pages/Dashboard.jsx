@@ -31,13 +31,18 @@ function Dashboard() {
       .history()
       .then(({ attendance = [] }) =>
         setRecentAttendance(
-          attendance.slice(0, 4).map((item) => ({
+          attendance.map((item) => ({
             ...item,
             date: item.attendance_date,
             day: item.attendance_date,
             masuk: item.check_in_time,
             pulang: item.check_out_time,
-            status: item.status === "COMPLETED" ? "Hadir" : "Sedang bekerja",
+            status:
+              item.status === "LATE"
+                ? "Terlambat"
+                : item.status === "COMPLETED"
+                  ? "Hadir"
+                  : "Sedang bekerja",
           })),
         ),
       )
@@ -49,13 +54,28 @@ function Dashboard() {
   }, []);
 
   const userName = useMemo(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem("absenku_user") || "{}");
-      return saved.full_name || saved.name || "Pengguna";
-    } catch {
-      return "Pengguna";
-    }
-  }, []);
+    return userProfile?.full_name || "Pengguna";
+  }, [userProfile]);
+
+  const monthSummary = useMemo(() => {
+    const monthKey = new Date().toISOString().slice(0, 7);
+    const currentMonth = recentAttendance.filter((item) =>
+      String(item.date || "").startsWith(monthKey),
+    );
+    const hadir = currentMonth.filter((item) => item.status === "Hadir").length;
+    const terlambat = currentMonth.filter(
+      (item) => item.status === "Terlambat",
+    ).length;
+
+    return {
+      total: currentMonth.length,
+      hadir,
+      terlambat,
+      percentage: currentMonth.length
+        ? Math.round((hadir / currentMonth.length) * 100)
+        : 0,
+    };
+  }, [recentAttendance]);
 
   const today = useMemo(() => {
     return new Intl.DateTimeFormat("id-ID", {
@@ -222,9 +242,7 @@ function Dashboard() {
                       Jadwal Hari Ini
                     </h2>
 
-                    <p className="mt-0.5 text-xs text-slate-500">
-                      Senin, 7 September 2026
-                    </p>
+                    <p className="mt-0.5 text-xs text-slate-500">{today}</p>
                   </div>
                 </div>
 
@@ -252,10 +270,15 @@ function Dashboard() {
                   <p className="mt-5 text-xs text-slate-400">Jam Kerja</p>
 
                   <p className="mt-1 text-xl font-bold text-[#0B2875]">
-                    08:00 - 16:00
+                    {todayAttendance?.schedule?.check_in &&
+                    todayAttendance?.schedule?.check_out
+                      ? `${todayAttendance.schedule.check_in} - ${todayAttendance.schedule.check_out}`
+                      : "Jadwal belum tersedia"}
                   </p>
 
-                  <p className="mt-1 text-xs text-slate-500">Senin - Jumat</p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {todayAttendance?.schedule?.label || "Dari sistem presensi"}
+                  </p>
                 </div>
 
                 {/* LOKASI */}
@@ -273,7 +296,7 @@ function Dashboard() {
                   <p className="mt-5 text-xs text-slate-400">Lokasi PKL</p>
 
                   <p className="mt-1 text-sm font-bold leading-5 text-[#0B2875]">
-                    Direktorat Bina Teknik SDA
+                    {todayAttendance?.location?.name || "Lokasi belum tersedia"}
                   </p>
 
                   <p className="mt-1 text-xs text-slate-500">
@@ -296,11 +319,18 @@ function Dashboard() {
                   <p className="mt-5 text-xs text-slate-400">Durasi Hari Ini</p>
 
                   <p className="mt-1 text-xl font-bold text-[#0B2875]">
-                    6j 18m
+                    {todayAttendance?.attendance?.duration_text || "-"}
                   </p>
 
                   <p className="mt-1 text-xs text-slate-500">
-                    Sejak pukul 07:42
+                    {todayAttendance?.attendance?.check_in_time
+                      ? `Sejak pukul ${new Date(
+                          todayAttendance.attendance.check_in_time,
+                        ).toLocaleTimeString("id-ID", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}`
+                      : "Belum ada presensi masuk"}
                   </p>
                 </div>
               </div>
@@ -349,7 +379,11 @@ function Dashboard() {
                 </h2>
 
                 <p className="mt-1 text-xs text-slate-500">
-                  Rekap kehadiran September 2026
+                  Rekap kehadiran{" "}
+                  {new Intl.DateTimeFormat("id-ID", {
+                    month: "long",
+                    year: "numeric",
+                  }).format(new Date())}
                 </p>
               </div>
 
@@ -362,25 +396,33 @@ function Dashboard() {
               <div className="rounded-2xl bg-slate-50 p-4">
                 <p className="text-[11px] text-slate-400">Hari Kerja</p>
 
-                <p className="mt-2 text-2xl font-bold text-[#0B2875]">22</p>
+                <p className="mt-2 text-2xl font-bold text-[#0B2875]">
+                  {monthSummary.total}
+                </p>
               </div>
 
               <div className="rounded-2xl bg-blue-50 p-4">
                 <p className="text-[11px] text-slate-400">Hadir</p>
 
-                <p className="mt-2 text-2xl font-bold text-[#073BBA]">18</p>
+                <p className="mt-2 text-2xl font-bold text-[#073BBA]">
+                  {monthSummary.hadir}
+                </p>
               </div>
 
               <div className="rounded-2xl bg-yellow-50 p-4">
                 <p className="text-[11px] text-slate-400">Terlambat</p>
 
-                <p className="mt-2 text-2xl font-bold text-yellow-600">2</p>
+                <p className="mt-2 text-2xl font-bold text-yellow-600">
+                  {monthSummary.terlambat}
+                </p>
               </div>
 
               <div className="rounded-2xl bg-emerald-50 p-4">
                 <p className="text-[11px] text-slate-400">Kehadiran</p>
 
-                <p className="mt-2 text-2xl font-bold text-emerald-600">82%</p>
+                <p className="mt-2 text-2xl font-bold text-emerald-600">
+                  {monthSummary.percentage}%
+                </p>
               </div>
             </div>
 
@@ -391,7 +433,7 @@ function Dashboard() {
                 </p>
 
                 <p className="mt-1 text-xs text-slate-400">
-                  Data dapat berubah setelah terhubung dengan API.
+                  Ringkasan ini berasal dari data presensi backend.
                 </p>
               </div>
 

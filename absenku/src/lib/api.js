@@ -1,5 +1,5 @@
 const API_URL = (
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api"
+  import.meta.env.VITE_API_URL || "https://presensi-be.vercel.app/"
 ).replace(/\/$/, "");
 
 export function getToken() {
@@ -46,18 +46,18 @@ export async function apiRequest(path, options = {}) {
 
 export const authApi = {
   login: (identifier, password) =>
-    apiRequest("/auth/login", {
+    apiRequest("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({ identifier, password }),
     }),
-  me: () => apiRequest("/auth/me"),
+  me: () => apiRequest("/api/auth/me"),
   updateMe: (updates) =>
-    apiRequest("/auth/me", {
+    apiRequest("/api/auth/me", {
       method: "PATCH",
       body: JSON.stringify(updates),
     }),
   forgotPassword: (email) =>
-    apiRequest("/auth/forgot-password", {
+    apiRequest("/api/auth/forgot-password", {
       method: "POST",
       body: JSON.stringify({
         email,
@@ -67,41 +67,43 @@ export const authApi = {
 };
 
 export const attendanceApi = {
-  today: () => apiRequest("/attendance/today"),
-  history: () => apiRequest("/attendance/history"),
-  location: () => apiRequest("/attendance/location"),
+  today: () => apiRequest("/api/attendance/today"),
+  history: () => apiRequest("/api/attendance/history"),
+  location: () => apiRequest("/api/attendance/location"),
   checkIn: (payload) =>
-    apiRequest("/attendance/check-in", {
+    apiRequest("/api/attendance/check-in", {
       method: "POST",
       body: JSON.stringify(payload),
     }),
   checkOut: (payload) =>
-    apiRequest("/attendance/check-out", {
+    apiRequest("/api/attendance/check-out", {
       method: "POST",
       body: JSON.stringify(payload),
     }),
 };
 
 export const adminApi = {
-  students: () => apiRequest("/admin/students"),
-  todayAttendance: () => apiRequest("/admin/attendance/today"),
-  attendanceStats: () => apiRequest("/admin/attendance/stats"),
+  students: () => apiRequest("/api/admin/students"),
+  todayAttendance: () => apiRequest("/api/admin/attendance/today"),
+  attendanceStats: () => apiRequest("/api/admin/attendance/stats"),
   attendanceHistory: (params = {}) => {
     const query = new URLSearchParams(params).toString();
-    return apiRequest(`/admin/attendance/history${query ? `?${query}` : ""}`);
+    return apiRequest(
+      `/api/admin/attendance/history${query ? `?${query}` : ""}`,
+    );
   },
-  leaveRequests: () => apiRequest("/admin/leave-requests"),
+  leaveRequests: () => apiRequest("/api/admin/leave-requests"),
   updateLeaveRequest: (id, status) =>
-    apiRequest(`/admin/leave-requests/${id}`, {
+    apiRequest(`/api/admin/leave-requests/${id}`, {
       method: "PATCH",
       body: JSON.stringify({ status }),
     }),
 };
 
 export const leaveApi = {
-  mine: () => apiRequest("/leave-requests"),
+  mine: () => apiRequest("/api/leave-requests"),
   create: (payload) =>
-    apiRequest("/leave-requests", {
+    apiRequest("/api/leave-requests", {
       method: "POST",
       body: JSON.stringify(payload),
     }),

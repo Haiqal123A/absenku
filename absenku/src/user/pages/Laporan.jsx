@@ -11,33 +11,55 @@ import {
 } from "lucide-react";
 
 import UserNavbar from "../components/UserNavbar";
-import { attendanceApi } from "../../lib/api";
-
-const periodeOptions = ["September 2026", "Agustus 2026", "Juli 2026"];
+import { attendanceApi, leaveApi } from "../../lib/api";
 
 function Laporan() {
-  const [periode, setPeriode] = useState("September 2026");
+  const [periode, setPeriode] = useState("");
   const [laporanData, setLaporanData] = useState([]);
+  const [izinCount, setIzinCount] = useState(0);
 
   useEffect(() => {
     attendanceApi
       .history()
       .then(({ attendance = [] }) => {
-        setLaporanData(
-          attendance.map((item) => ({
-            tanggal: item.attendance_date,
-            hari: new Date(
-              `${item.attendance_date}T00:00:00`,
-            ).toLocaleDateString("id-ID", { weekday: "long" }),
-            masuk: item.check_in_time,
-            pulang: item.check_out_time,
-            durasi: item.duration_text || "-",
-            status: item.status === "COMPLETED" ? "Hadir" : "Sedang bekerja",
-          })),
-        );
+        const mappedAttendance = attendance.map((item) => ({
+          tanggal: item.attendance_date,
+          hari: new Date(`${item.attendance_date}T00:00:00`).toLocaleDateString(
+            "id-ID",
+            { weekday: "long" },
+          ),
+          masuk: item.check_in_time,
+          pulang: item.check_out_time,
+          durasi: item.duration_text || "-",
+          status:
+            item.status === "LATE"
+              ? "Terlambat"
+              : item.status === "COMPLETED"
+                ? "Hadir"
+                : "Sedang bekerja",
+        }));
+        setLaporanData(mappedAttendance);
+        setPeriode(mappedAttendance[0]?.tanggal?.slice(0, 7) || "");
       })
       .catch(() => setLaporanData([]));
+    leaveApi
+      .mine()
+      .then(({ requests = [] }) =>
+        setIzinCount(
+          requests.filter((request) => request.status !== "REJECTED").length,
+        ),
+      )
+      .catch(() => setIzinCount(0));
   }, []);
+
+  const periodeOptions = useMemo(
+    () =>
+      [...new Set(laporanData.map((item) => item.tanggal).filter(Boolean))]
+        .map((date) => date.slice(0, 7))
+        .sort()
+        .reverse(),
+    [laporanData],
+  );
 
   const summary = useMemo(() => {
     const hadir = laporanData.filter((item) => item.status === "Hadir").length;
@@ -50,12 +72,12 @@ function Laporan() {
       hariKerja: laporanData.length,
       hadir,
       terlambat,
-      izin: 0,
+      izin: izinCount,
       persentase: laporanData.length
         ? Math.round((hadir / laporanData.length) * 100)
         : 0,
     };
-  }, [laporanData]);
+  }, [laporanData, izinCount]);
 
   const handleDownload = () => {
     const headers = [
@@ -176,8 +198,13 @@ function Laporan() {
                 onChange={(e) => setPeriode(e.target.value)}
                 className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white pl-10 pr-10 text-sm font-medium text-slate-700 outline-none transition focus:border-[#073BBA] focus:ring-2 focus:ring-blue-100 sm:w-[190px]"
               >
-                {periodeOptions.map((item) => (
-                  <option key={item}>{item}</option>
+                {periodeOptions.map((monthKey) => (
+                  <option key={monthKey} value={monthKey}>
+                    {new Intl.DateTimeFormat("id-ID", {
+                      month: "long",
+                      year: "numeric",
+                    }).format(new Date(`${monthKey}-01T00:00:00`))}
+                  </option>
                 ))}
               </select>
 

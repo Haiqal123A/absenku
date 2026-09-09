@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import { adminApi } from "../lib/api";
 
-const STORAGE_KEY = "absenku-students";
-const DATE_KEY = "absenku-attendance-date";
-const HISTORY_KEY = "absenku-attendance-history";
-const SETTINGS_KEY = "absenku-settings";
-export const LEAVE_REQUESTS_KEY = "absenku-leave-requests";
-
 const defaultSchedule = {
   senin: { masuk: "08:00", pulang: "16:00" },
   selasa: { masuk: "08:00", pulang: "16:00" },
@@ -15,100 +9,11 @@ const defaultSchedule = {
   jumat: { masuk: "08:00", pulang: "16:00" },
 };
 
-const defaultSettings = {
+export const defaultSettings = {
   nama: "Administrator",
   lokasi: "Kantor PUPR, Jakarta",
   jadwal: defaultSchedule,
 };
-
-export const initialStudents = [
-  {
-    id: 1,
-    nama: "Andi Pratama",
-    nis: "23001",
-    jurusan: "Rekayasa Perangkat Lunak",
-    gmail: "andi.pratama@gmail.com",
-    noHp: "081234567890",
-    kelas: "XI RPL 1",
-    sekolah: "SMK Negeri 1",
-    pembimbing: "Bapak Ahmad",
-    status: "Hadir",
-    statusAkun: "Aktif",
-    wfhDays: [],
-    jamMasuk: "07:48",
-    jamPulang: "16:02",
-  },
-  {
-    id: 2,
-    nama: "Budi Santoso",
-    nis: "23002",
-    jurusan: "Teknik Komputer dan Jaringan",
-    gmail: "budi.santoso@gmail.com",
-    noHp: "081234567891",
-    kelas: "XI RPL 2",
-    sekolah: "SMK Negeri 2",
-    pembimbing: "Ibu Sinta",
-    status: "Hadir",
-    statusAkun: "Aktif",
-    wfhDays: [],
-    jamMasuk: "07:55",
-    jamPulang: "16:00",
-  },
-  {
-    id: 3,
-    nama: "Citra Lestari",
-    nis: "23003",
-    jurusan: "Teknik Komputer dan Jaringan",
-    gmail: "citra.lestari@gmail.com",
-    noHp: "081234567892",
-    kelas: "XI TKJ 1",
-    sekolah: "SMK Negeri 1",
-    pembimbing: "Bapak Ahmad",
-    status: "Terlambat",
-    statusAkun: "Aktif",
-    wfhDays: [],
-    jamMasuk: "08:12",
-    jamPulang: "16:00",
-  },
-  {
-    id: 4,
-    nama: "Dimas Saputra",
-    nis: "23004",
-    jurusan: "Multimedia",
-    gmail: "dimas.saputra@gmail.com",
-    noHp: "081234567893",
-    kelas: "XI TKJ 2",
-    sekolah: "SMK Negeri 3",
-    pembimbing: "Ibu Sinta",
-    status: "Sakit",
-    statusAkun: "Aktif",
-    wfhDays: [],
-    jamMasuk: "-",
-    jamPulang: "-",
-  },
-];
-
-function readStudents() {
-  try {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    return stored
-      ? JSON.parse(stored).map((student) => ({
-          ...student,
-          jurusan: student.jurusan || "",
-          gmail: student.gmail || "",
-          noHp: student.noHp || "",
-          statusAkun: student.statusAkun || "Aktif",
-          wfhDays: student.wfhDays || [],
-        }))
-      : initialStudents;
-  } catch {
-    return initialStudents;
-  }
-}
-
-function getTodayKey() {
-  return new Date().toISOString().slice(0, 10);
-}
 
 function formatDate(dateKey) {
   return new Intl.DateTimeFormat("id-ID", {
@@ -118,71 +23,8 @@ function formatDate(dateKey) {
   }).format(new Date(`${dateKey}T00:00:00`));
 }
 
-function readHistory() {
-  try {
-    const stored = window.localStorage.getItem(HISTORY_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-}
-
-function readSettings() {
-  try {
-    const stored = window.localStorage.getItem(SETTINGS_KEY);
-    const parsed = stored ? JSON.parse(stored) : {};
-    return {
-      ...defaultSettings,
-      ...parsed,
-      jadwal: Object.keys(defaultSchedule).reduce(
-        (schedule, day) => ({
-          ...schedule,
-          [day]: {
-            ...defaultSchedule[day],
-            ...(parsed.jadwal?.[day] || {}),
-          },
-        }),
-        {},
-      ),
-    };
-  } catch {
-    return defaultSettings;
-  }
-}
-
-function readStudentsForToday() {
-  const students = readStudents();
-  const today = getTodayKey();
-  const lastDate = window.localStorage.getItem(DATE_KEY);
-
-  if (!lastDate) {
-    window.localStorage.setItem(DATE_KEY, today);
-    return students;
-  }
-
-  if (lastDate === today) return students;
-
-  const archived = students.map((student) => ({
-    ...student,
-    tanggal: formatDate(lastDate),
-  }));
-  const history = [...archived, ...readHistory()];
-  const resetStudents = students.map((student) => ({
-    ...student,
-    status: "Belum Absen",
-    jamMasuk: "-",
-    jamPulang: "-",
-  }));
-
-  window.localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(resetStudents));
-  window.localStorage.setItem(DATE_KEY, today);
-  return resetStudents;
-}
-
 export function useStudents() {
   const [students, setStudents] = useState([]);
-  const [loadedFromBackend, setLoadedFromBackend] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -239,58 +81,28 @@ export function useStudents() {
             };
           }),
         );
-        setLoadedFromBackend(true);
       })
       .catch(() => {
         if (active) setStudents([]);
       });
 
-    const syncStudents = () => setStudents(readStudentsForToday());
-    const handleStorage = (event) => {
-      if (event.key === STORAGE_KEY) syncStudents();
-    };
-
-    window.addEventListener("storage", handleStorage);
-    window.addEventListener("absenku-students-updated", syncStudents);
-    window.addEventListener("absenku-history-updated", syncStudents);
-
     return () => {
       active = false;
-      window.removeEventListener("storage", handleStorage);
-      window.removeEventListener("absenku-students-updated", syncStudents);
-      window.removeEventListener("absenku-history-updated", syncStudents);
     };
-  }, [loadedFromBackend]);
+  }, []);
 
   function updateStudents(nextStudents) {
     setStudents(nextStudents);
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextStudents));
-    window.localStorage.setItem(DATE_KEY, getTodayKey());
-    window.dispatchEvent(new Event("absenku-students-updated"));
-    window.dispatchEvent(new Event("absenku-history-updated"));
   }
 
   return [students, updateStudents];
 }
 
 export function useAdminSettings() {
-  const [settings, setSettings] = useState(readSettings);
-
-  useEffect(() => {
-    const syncSettings = () => setSettings(readSettings());
-    window.addEventListener("storage", syncSettings);
-    window.addEventListener("absenku-settings-updated", syncSettings);
-
-    return () => {
-      window.removeEventListener("storage", syncSettings);
-      window.removeEventListener("absenku-settings-updated", syncSettings);
-    };
-  }, []);
+  const [settings, setSettings] = useState(defaultSettings);
 
   function updateSettings(nextSettings) {
     setSettings(nextSettings);
-    window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(nextSettings));
-    window.dispatchEvent(new Event("absenku-settings-updated"));
   }
 
   return [settings, updateSettings];
@@ -303,7 +115,7 @@ export function getAttendance(student) {
       student.status === "Hadir" || student.status === "Terlambat"
         ? "Kantor PUPR, Jakarta"
         : "Tidak hadir di lokasi",
-    tanggal: formatDate(getTodayKey()),
+    tanggal: formatDate(new Date().toISOString().slice(0, 10)),
     foto: student.foto || "",
   };
 }
@@ -412,22 +224,14 @@ export function useAttendanceHistory() {
         if (active) setHistory([]);
       });
 
-    const syncHistory = () => setHistory(readHistory());
-    window.addEventListener("storage", syncHistory);
-    window.addEventListener("absenku-history-updated", syncHistory);
-
     return () => {
       active = false;
-      window.removeEventListener("storage", syncHistory);
-      window.removeEventListener("absenku-history-updated", syncHistory);
     };
   }, []);
 
   return history;
 }
 
-// Dipakai bersama halaman user dan admin. Pengajuan baru disimpan sebagai array
-// pada localStorage `absenku-leave-requests` lalu event ini dikirimkan.
 export function useLeaveRequests() {
   const [requests, setRequests] = useState([]);
 

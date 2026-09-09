@@ -1,47 +1,9 @@
 import { Link } from "react-router-dom";
-import {
-  CheckCircle2,
-  Clock3,
-  MapPin,
-} from "lucide-react";
+import { CheckCircle2, Clock3, MapPin } from "lucide-react";
 
-const attendanceData = [
-  {
-    date: "Senin, 8 Sep 2025",
-    time: "08:12 WIB",
-    location: "Kantor PUPR Jakarta",
-    status: "Hadir",
-  },
-  {
-    date: "Jumat, 5 Sep 2025",
-    time: "08:24 WIB",
-    location: "Kantor PUPR Jakarta",
-    status: "Hadir",
-  },
-  {
-    date: "Kamis, 4 Sep 2025",
-    time: "08:47 WIB",
-    location: "Kantor PUPR Jakarta",
-    status: "Terlambat",
-  },
-  {
-    date: "Rabu, 3 Sep 2025",
-    time: "08:16 WIB",
-    location: "Kantor PUPR Jakarta",
-    status: "Hadir",
-  },
-  {
-    date: "Selasa, 2 Sep 2025",
-    time: "08:10 WIB",
-    location: "Kantor PUPR Jakarta",
-    status: "Hadir",
-  },
-];
-
-function AttendanceTable() {
+function AttendanceTable({ attendanceData = [] }) {
   return (
     <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-
       {/* HEADER */}
       <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
         <div>
@@ -109,10 +71,7 @@ function AttendanceTable() {
                 {/* LOCATION */}
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2 text-sm text-slate-600">
-                    <MapPin
-                      size={15}
-                      className="text-[#073BBA]"
-                    />
+                    <MapPin size={15} className="text-[#073BBA]" />
 
                     {item.location}
                   </div>

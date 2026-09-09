@@ -29,8 +29,6 @@ function Login() {
       const result = await authApi.login(email, password);
 
       localStorage.setItem("absenku_token", result.access_token);
-      localStorage.setItem("absenku_logged_in", "true");
-      localStorage.setItem("absenku_user", JSON.stringify(result.user));
 
       navigate(
         String(result.user?.role || "").toLowerCase() === "admin"

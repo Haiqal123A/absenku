@@ -47,7 +47,6 @@ function Profile() {
           birth_date: user.birth_date || "",
           birth_place: user.birth_place || "",
         });
-        localStorage.setItem("absenku_user", JSON.stringify(user));
       })
       .catch((requestError) => setError(requestError.message))
       .finally(() => setLoading(false));
@@ -74,7 +73,6 @@ function Profile() {
     try {
       const result = await authApi.updateMe(form);
       setProfile(result.user);
-      localStorage.setItem("absenku_user", JSON.stringify(result.user));
       setEditing(false);
     } catch (requestError) {
       setError(requestError.message);

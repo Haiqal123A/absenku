@@ -18,13 +18,7 @@ import { authApi } from "../../lib/api";
 function UserNavbar() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("absenku_user") || "{}");
-    } catch {
-      return {};
-    }
-  });
+  const [user, setUser] = useState({});
 
   useEffect(() => {
     let active = true;
@@ -34,7 +28,6 @@ function UserNavbar() {
       .then(({ user: currentUser }) => {
         if (!active) return;
         setUser(currentUser);
-        localStorage.setItem("absenku_user", JSON.stringify(currentUser));
       })
       .catch(() => {
         // Route protection handles expired sessions; keep cached data while loading.
@@ -78,9 +71,7 @@ function UserNavbar() {
   const handleLogout = () => {
     if (!window.confirm("Yakin ingin logout?")) return;
 
-    localStorage.removeItem("absenku_logged_in");
     localStorage.removeItem("absenku_token");
-    localStorage.removeItem("absenku_user");
 
     setMobileMenuOpen(false);
 

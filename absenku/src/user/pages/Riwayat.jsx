@@ -469,7 +469,7 @@ function Riwayat() {
                       <Camera size={30} className="mx-auto text-slate-300" />
 
                       <p className="text-xs text-slate-400 mt-2">
-                        Foto dummy / belum tersedia
+                        Foto belum tersedia
                       </p>
                     </div>
                   </div>
