@@ -23,11 +23,11 @@ const wfhOptions = [
 const emptyForm = {
   nama: "",
   nis: "",
-  foto: "",
   kelas: "",
   sekolah: "",
   jurusan: "",
   email: "",
+  password: "",
   noHp: "",
   pembimbing: "",
   status: "Belum Absen",
@@ -92,7 +92,8 @@ export default function AnakPKL() {
     if (
       !form.nama.trim() ||
       !form.nis.trim() ||
-      !form.kelas.trim()
+      !form.kelas.trim() ||
+      !form.password.trim()
     ) {
       return;
     }
@@ -117,11 +118,11 @@ export default function AnakPKL() {
     setForm({
       nama: student.nama || "",
       nis: student.nis || "",
-      foto: student.foto || "",
       kelas: student.kelas || "",
       sekolah: student.sekolah || "",
       jurusan: student.jurusan || "",
       email: student.email || "",
+      password: "",
       noHp: student.noHp || "",
       pembimbing: student.pembimbing || "",
       status: student.status || "Belum Absen",
@@ -143,14 +144,25 @@ export default function AnakPKL() {
     }
 
     setData(
-      data.map((student) =>
-        student.id === editingStudent.id
-          ? {
-              ...student,
-              ...form,
-            }
-          : student
-      )
+      data.map((student) => {
+        if (student.id !== editingStudent.id) {
+          return student;
+        }
+
+        const updatedStudent = {
+          ...student,
+          ...form,
+          foto: student.foto,
+        };
+
+        // Kalau password kosong,
+        // pertahankan password lama.
+        if (!form.password.trim()) {
+          updatedStudent.password = student.password || "";
+        }
+
+        return updatedStudent;
+      })
     );
 
     setEditingStudent(null);
@@ -173,6 +185,7 @@ export default function AnakPKL() {
         </div>
 
         <button
+          type="button"
           onClick={bukaTambah}
           className="flex items-center justify-center gap-2 rounded-xl bg-[#073b9e] px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
         >
@@ -184,7 +197,10 @@ export default function AnakPKL() {
       {/* JADWAL */}
       <ScheduleInfo settings={settings} />
 
+      {/* ========================= */}
       {/* FORM TAMBAH */}
+      {/* ========================= */}
+
       {showForm && (
         <form
           onSubmit={tambahSiswa}
@@ -196,7 +212,7 @@ export default function AnakPKL() {
             </h2>
 
             <p className="mt-1 text-xs text-slate-500">
-              Masukkan data lengkap siswa PKL.
+              Masukkan data siswa dan buat akun login untuk siswa.
             </p>
           </div>
 
@@ -293,7 +309,23 @@ export default function AnakPKL() {
                   email: event.target.value,
                 })
               }
-              placeholder="Email"
+              placeholder="Email login"
+              className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-blue-500"
+            />
+
+            {/* PASSWORD */}
+            <input
+              required
+              type="password"
+              value={form.password}
+              onChange={(event) =>
+                setForm({
+                  ...form,
+                  password: event.target.value,
+                })
+              }
+              placeholder="Password login"
+              minLength={6}
               className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-blue-500"
             />
 
@@ -310,19 +342,31 @@ export default function AnakPKL() {
               placeholder="No. HP"
               className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-blue-500"
             />
+          </div>
 
-            {/* FOTO */}
-            <input
-              value={form.foto}
-              onChange={(event) =>
-                setForm({
-                  ...form,
-                  foto: event.target.value,
-                })
-              }
-              placeholder="URL foto siswa"
-              className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-blue-500"
-            />
+          {/* INFO LOGIN */}
+          <div className="mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-4">
+            <p className="text-sm font-bold text-yellow-800">
+              Akun Login Siswa
+            </p>
+
+            <p className="mt-1 text-xs leading-5 text-yellow-700">
+              Siswa dapat login menggunakan email atau NIS yang dibuat
+              oleh admin, kemudian menggunakan password yang dibuat
+              di sini.
+            </p>
+          </div>
+
+          {/* INFO FOTO */}
+          <div className="mt-4 rounded-xl border border-blue-100 bg-white p-4">
+            <p className="text-sm font-bold text-slate-700">
+              Foto Profil
+            </p>
+
+            <p className="mt-1 text-xs leading-5 text-slate-500">
+              Foto tidak perlu dimasukkan dari halaman admin.
+              Foto siswa akan berasal dari profil user/backend.
+            </p>
           </div>
 
           {/* WFH */}
@@ -356,7 +400,10 @@ export default function AnakPKL() {
         </form>
       )}
 
+      {/* ========================= */}
       {/* DATA SISWA */}
+      {/* ========================= */}
+
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
 
         {/* TOP */}
@@ -575,7 +622,7 @@ export default function AnakPKL() {
                 </h2>
 
                 <p className="mt-1 text-sm text-slate-500">
-                  Ubah data siswa PKL.
+                  Ubah data siswa PKL dan akun login.
                 </p>
               </div>
 
@@ -687,7 +734,22 @@ export default function AnakPKL() {
                     email: event.target.value,
                   })
                 }
-                placeholder="Email"
+                placeholder="Email login"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-blue-500"
+              />
+
+              {/* PASSWORD */}
+              <input
+                type="password"
+                value={form.password}
+                onChange={(event) =>
+                  setForm({
+                    ...form,
+                    password: event.target.value,
+                  })
+                }
+                placeholder="Password baru (opsional)"
+                minLength={6}
                 className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-blue-500"
               />
 
@@ -703,19 +765,6 @@ export default function AnakPKL() {
                 }
                 placeholder="No. HP"
                 className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-blue-500"
-              />
-
-              {/* FOTO */}
-              <input
-                value={form.foto}
-                onChange={(event) =>
-                  setForm({
-                    ...form,
-                    foto: event.target.value,
-                  })
-                }
-                placeholder="URL foto siswa"
-                className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-blue-500 sm:col-span-2"
               />
 
               {/* STATUS AKUN */}
@@ -737,7 +786,31 @@ export default function AnakPKL() {
                   Nonaktif
                 </option>
               </select>
+            </div>
 
+            {/* INFO PASSWORD */}
+            <div className="mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-4">
+              <p className="text-sm font-bold text-yellow-800">
+                Password Login
+              </p>
+
+              <p className="mt-1 text-xs leading-5 text-yellow-700">
+                Kosongkan password jika tidak ingin mengubah password
+                siswa. Siswa dapat login menggunakan email atau NIS.
+              </p>
+            </div>
+
+            {/* INFO FOTO */}
+            <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 p-4">
+              <p className="text-sm font-bold text-slate-700">
+                Foto Profil
+              </p>
+
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Foto profil tidak diubah dari halaman admin.
+                Foto akan mengikuti foto yang disimpan user
+                melalui profile/backend.
+              </p>
             </div>
 
             {/* WFH */}

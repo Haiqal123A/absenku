@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { Eye, EyeOff, Lock, Mail, LogIn, AlertCircle } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  LogIn,
+  AlertCircle,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
@@ -26,67 +33,70 @@ function Login() {
 
     try {
       /*
-        ==========================================
-        API LOGIN NANTI DITARUH DI SINI
-        ==========================================
-
-        Contoh:
-
-        const response = await fetch("/api/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            password,
-          }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message);
-        }
-
-        localStorage.setItem(
-          "token",
-          data.token
-        );
+      =====================================================
+      LOGIN ADMIN
+      =====================================================
       */
 
-      // Simulasi sementara
-      await new Promise((resolve) =>
-        setTimeout(resolve, 800)
-      );
-
-      // Demo login
       if (
-        email !== "farras@absenku.com" ||
-        password !== "123456"
+        email === "admin@absenku.com" &&
+        password === "admin123"
       ) {
-        setError(
-          "Email atau password yang Anda masukkan salah."
+        localStorage.setItem(
+          "absenku_logged_in",
+          "true"
         );
+
+        localStorage.setItem(
+          "absenku_user",
+          JSON.stringify({
+            name: "Administrator",
+            email: email,
+            role: "Admin",
+          })
+        );
+
+        navigate("/admin/dashboard");
         return;
       }
 
-      localStorage.setItem(
-        "absenku_logged_in",
-        "true"
+      /*
+      =====================================================
+      LOGIN USER / PEGAWAI
+      =====================================================
+      */
+
+      if (
+        email === "farras@absenku.com" &&
+        password === "123456"
+      ) {
+        localStorage.setItem(
+          "absenku_logged_in",
+          "true"
+        );
+
+        localStorage.setItem(
+          "absenku_user",
+          JSON.stringify({
+            name: "Farras Khairy",
+            email: email,
+            role: "Pegawai",
+          })
+        );
+
+        navigate("/user/dashboard");
+        return;
+      }
+
+      /*
+      =====================================================
+      LOGIN GAGAL
+      =====================================================
+      */
+
+      setError(
+        "Email atau password yang Anda masukkan salah."
       );
-
-      localStorage.setItem(
-        "absenku_user",
-        JSON.stringify({
-          name: "Farras Khairy",
-          email: email,
-          role: "Pegawai",
-        })
-      );
-
-      navigate("/user/dashboard");
-
     } catch (error) {
       console.error(error);
 
@@ -110,8 +120,6 @@ function Login() {
           ========================= */}
 
           <div className="hidden lg:flex relative bg-[#073BBA] p-12 overflow-hidden">
-
-            {/* Decoration */}
 
             <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-[#FFD21A] opacity-20" />
 
@@ -148,8 +156,11 @@ function Login() {
               <div className="my-auto py-16">
 
                 <div className="inline-flex items-center gap-2 bg-white/10 border border-white/10 text-blue-100 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+
                   <span className="w-2 h-2 bg-[#FFD21A] rounded-full" />
-                  Portal Pegawai
+
+                  Portal ABSENKU
+
                 </div>
 
                 <h2 className="text-4xl font-black text-white leading-tight">
@@ -160,9 +171,9 @@ function Login() {
 
                 <p className="text-blue-100 mt-5 leading-7 max-w-md">
                   Catat presensi masuk dan pulang,
-                  pantau riwayat kehadiran, ajukan
+                  pantau riwayat kehadiran, kelola
                   izin, dan lihat laporan presensi
-                  Anda dalam satu platform.
+                  dalam satu platform.
                 </p>
 
               </div>
@@ -174,6 +185,7 @@ function Login() {
               </p>
 
             </div>
+
           </div>
 
           {/* =========================
@@ -219,8 +231,8 @@ function Login() {
               </h2>
 
               <p className="text-sm text-slate-500 mt-2">
-                Silakan masuk untuk mengakses dashboard
-                presensi Anda.
+                Silakan masuk untuk mengakses sistem
+                ABSENKU.
               </p>
 
             </div>
@@ -374,6 +386,7 @@ function Login() {
                 ) : (
                   <>
                     <LogIn size={19} />
+
                     Masuk
                   </>
                 )}
@@ -390,13 +403,27 @@ function Login() {
                 Akun Demo
               </p>
 
-              <p className="text-xs text-yellow-700 mt-1">
-                Email: farras@absenku.com
-              </p>
+              <div className="mt-2 space-y-1">
 
-              <p className="text-xs text-yellow-700">
-                Password: 123456
-              </p>
+                <p className="text-xs text-yellow-700">
+                  <b>Admin:</b>
+                  <br />
+                  Email: admin@absenku.com
+                  <br />
+                  Password: admin123
+                </p>
+
+                <div className="border-t border-yellow-200 my-2" />
+
+                <p className="text-xs text-yellow-700">
+                  <b>Pegawai:</b>
+                  <br />
+                  Email: farras@absenku.com
+                  <br />
+                  Password: 123456
+                </p>
+
+              </div>
 
             </div>
 

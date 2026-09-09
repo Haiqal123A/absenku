@@ -7,7 +7,14 @@ import UserRoutes from "./user/UserRoutes";
 function AppRoutes() {
   const { pathname } = useLocation();
 
-  return pathname.startsWith("/user") ? <UserRoutes /> : <AdminRoutes />;
+  // Halaman login dan seluruh halaman user
+  // menggunakan UserRoutes
+  if (pathname === "/login" || pathname.startsWith("/user")) {
+    return <UserRoutes />;
+  }
+
+  // Halaman admin menggunakan AdminRoutes
+  return <AdminRoutes />;
 }
 
 export default function App() {
