@@ -17,6 +17,7 @@ import { authApi } from "../../lib/api";
 
 function UserNavbar() {
   const navigate = useNavigate();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState({});
 
@@ -27,10 +28,13 @@ function UserNavbar() {
       .me()
       .then(({ user: currentUser }) => {
         if (!active) return;
-        setUser(currentUser);
+
+        setUser(currentUser || {});
       })
       .catch(() => {
-        // Route protection handles expired sessions; keep cached data while loading.
+        if (active) {
+          setUser({});
+        }
       });
 
     return () => {
@@ -38,68 +42,88 @@ function UserNavbar() {
     };
   }, []);
 
-  const userName = user.full_name || "Pengguna";
+  const userName = user?.full_name || "Pengguna";
+
+  const userRole =
+    user?.role === "student"
+      ? "Siswa / Peserta PKL"
+      : user?.role || "Pengguna";
 
   const menu = [
     {
       name: "Dashboard",
+      shortName: "Dashboard",
       path: "/user/dashboard",
       icon: LayoutDashboard,
     },
     {
       name: "Rekam Presensi",
+      shortName: "Presensi",
       path: "/user/presensi",
       icon: Camera,
     },
     {
       name: "Riwayat",
+      shortName: "Riwayat",
       path: "/user/riwayat",
       icon: Clock3,
     },
     {
       name: "Izin",
+      shortName: "Izin",
       path: "/user/izin",
       icon: FileText,
     },
     {
       name: "Laporan",
+      shortName: "Laporan",
       path: "/user/laporan",
       icon: FileText,
     },
   ];
 
-  const handleLogout = () => {
-    if (!window.confirm("Yakin ingin logout?")) return;
+  function closeMobileMenu() {
+    setMobileMenuOpen(false);
+  }
+
+  function handleLogout() {
+    const confirmed = window.confirm(
+      "Yakin ingin keluar dari akun ABSENKU?",
+    );
+
+    if (!confirmed) return;
 
     localStorage.removeItem("absenku_token");
 
-    setMobileMenuOpen(false);
+    closeMobileMenu();
 
     navigate("/login", {
       replace: true,
     });
-  };
+  }
 
-  const handleProfile = () => {
-    setMobileMenuOpen(false);
+  function handleProfile() {
+    closeMobileMenu();
+
     navigate("/user/profile");
-  };
+  }
 
   return (
     <>
       {/* =====================================================
-          HEADER
+          TOP NAVBAR
       ====================================================== */}
 
       <header className="sticky top-0 z-50 border-b border-blue-900/20 bg-[#073b9e] text-white shadow-md">
         <div className="mx-auto max-w-[1500px] px-3 sm:px-4 md:px-6 lg:px-8">
-          <div className="flex min-h-[64px] items-center justify-between gap-2 sm:min-h-[76px] sm:gap-4">
+          <div className="flex min-h-[64px] items-center justify-between gap-3 sm:min-h-[76px]">
             {/* =================================================
                 LOGO
             ================================================== */}
 
             <NavLink
               to="/user/dashboard"
+              onClick={closeMobileMenu}
               className="flex shrink-0 items-center gap-2.5"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#ffd51c] text-[#073b9e] shadow-sm sm:h-11 sm:w-11">
@@ -118,7 +142,7 @@ function UserNavbar() {
             </NavLink>
 
             {/* =================================================
-                DESKTOP MENU
+                DESKTOP NAVIGATION
             ================================================== */}
 
             <nav className="hidden items-center gap-1 lg:flex">
@@ -130,14 +154,16 @@ function UserNavbar() {
                     key={item.path}
                     to={item.path}
                     className={({ isActive }) =>
-                      `flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
+                      [
+                        "flex items-center gap-2 rounded-xl px-4 py-2.5",
+                        "text-sm font-semibold transition-all duration-200",
                         isActive
                           ? "bg-[#ffd51c] text-[#073b9e] shadow-sm"
-                          : "text-white hover:bg-white/10"
-                      }`
+                          : "text-white hover:bg-white/10",
+                      ].join(" ")
                     }
                   >
-                    <Icon size={17} />
+                    <Icon size={17} strokeWidth={2.2} />
 
                     <span>{item.name}</span>
                   </NavLink>
@@ -149,35 +175,62 @@ function UserNavbar() {
                 DESKTOP PROFILE
             ================================================== */}
 
-            <div className="hidden items-center gap-3 lg:flex">
-              <div className="relative group">
+            <div className="hidden lg:block">
+              <div className="group relative">
                 <button
                   type="button"
                   className="flex items-center gap-3 rounded-xl px-2 py-1.5 transition hover:bg-white/10"
                 >
                   {/* AVATAR */}
 
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#073b9e]">
-                    <User size={21} />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#073b9e] shadow-sm">
+                    <User size={21} strokeWidth={2.2} />
                   </div>
 
                   {/* USER INFO */}
 
-                  <div className="text-left">
-                    <p className="text-sm font-bold">{userName}</p>
+                  <div className="min-w-0 text-left">
+                    <p className="max-w-[150px] truncate text-sm font-bold">
+                      {userName}
+                    </p>
 
-                    <p className="text-xs text-blue-100">{user.role || "-"}</p>
+                    <p className="max-w-[150px] truncate text-xs text-blue-100">
+                      {userRole}
+                    </p>
                   </div>
 
-                  <ChevronDown size={17} />
+                  <ChevronDown
+                    size={17}
+                    className="transition-transform duration-200 group-hover:rotate-180"
+                  />
                 </button>
 
                 {/* =================================================
-                    PROFILE DROPDOWN
+                    DROPDOWN
                 ================================================== */}
 
-                <div className="absolute right-0 top-full hidden w-56 pt-2 group-hover:block">
-                  <div className="rounded-2xl border border-slate-200 bg-white p-2 text-slate-700 shadow-xl">
+                <div className="absolute right-0 top-full hidden w-60 pt-2 group-hover:block">
+                  <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 text-slate-700 shadow-2xl">
+                    {/* USER HEADER */}
+
+                    <div className="mb-1 rounded-xl bg-slate-50 px-3 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-[#073b9e]">
+                          <User size={19} />
+                        </div>
+
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-bold text-slate-800">
+                            {userName}
+                          </p>
+
+                          <p className="truncate text-xs text-slate-400">
+                            {userRole}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
                     {/* PROFILE */}
 
                     <button
@@ -186,7 +239,10 @@ function UserNavbar() {
                       className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-blue-50"
                     >
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-100">
-                        <UserRound size={17} className="text-[#073b9e]" />
+                        <UserRound
+                          size={17}
+                          className="text-[#073b9e]"
+                        />
                       </div>
 
                       <div>
@@ -195,7 +251,7 @@ function UserNavbar() {
                         </p>
 
                         <p className="text-[10px] text-slate-400">
-                          Lihat data diri
+                          Lihat dan kelola data diri
                         </p>
                       </div>
                     </button>
@@ -207,13 +263,21 @@ function UserNavbar() {
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-red-500 transition hover:bg-red-50"
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-red-50"
                     >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-50">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-500">
                         <LogOut size={17} />
                       </div>
 
-                      <span>Keluar</span>
+                      <div>
+                        <p className="text-sm font-bold text-red-500">
+                          Keluar
+                        </p>
+
+                        <p className="text-[10px] text-slate-400">
+                          Keluar dari akun
+                        </p>
+                      </div>
                     </button>
                   </div>
                 </div>
@@ -224,63 +288,69 @@ function UserNavbar() {
                 MOBILE MENU BUTTON
             ================================================== */}
 
-            <div className="flex items-center gap-2 lg:hidden">
-              <button
-                type="button"
-                onClick={() => setMobileMenuOpen((previous) => !previous)}
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#ffd51c] text-[#073b9e]"
-                aria-label={mobileMenuOpen ? "Tutup menu" : "Buka menu"}
-              >
-                {mobileMenuOpen ? <X size={21} /> : <Menu size={21} />}
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setMobileMenuOpen((previous) => !previous)
+              }
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#ffd51c] text-[#073b9e] shadow-sm transition hover:bg-yellow-300 lg:hidden"
+              aria-label={
+                mobileMenuOpen
+                  ? "Tutup menu"
+                  : "Buka menu"
+              }
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? (
+                <X size={21} />
+              ) : (
+                <Menu size={21} />
+              )}
+            </button>
           </div>
         </div>
 
         {/* =====================================================
-            MOBILE DROPDOWN
+            MOBILE MENU
         ====================================================== */}
 
         <div
-          className={`overflow-hidden transition-all duration-300 lg:hidden ${
+          className={[
+            "overflow-hidden transition-all duration-300 lg:hidden",
             mobileMenuOpen
-              ? "max-h-[600px] border-t border-white/10"
-              : "max-h-0"
-          }`}
+              ? "max-h-[700px] border-t border-white/10"
+              : "max-h-0",
+          ].join(" ")}
         >
           <div className="mx-auto max-w-[1500px] px-4 py-4">
             {/* =================================================
-                MOBILE PROFILE
+                MOBILE USER CARD
             ================================================== */}
 
-            <button
-              type="button"
-              onClick={handleProfile}
-              className="mb-3 flex w-full items-center justify-between rounded-2xl bg-white/10 p-4 text-left transition hover:bg-white/15"
-            >
+            <div className="mb-3 rounded-2xl bg-white/10 p-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#073b9e]">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#073b9e] shadow-sm">
                   <User size={21} />
                 </div>
 
-                <div>
-                  <p className="font-bold">{userName}</p>
+                <div className="min-w-0">
+                  <p className="truncate font-bold">
+                    {userName}
+                  </p>
 
-                  <p className="text-xs text-blue-100">{user.role || "-"}</p>
+                  <p className="truncate text-xs text-blue-100">
+                    {userRole}
+                  </p>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-2">
-                <span className="rounded-full bg-emerald-400/20 px-2.5 py-1 text-[10px] font-bold text-emerald-100">
+                <span className="ml-auto shrink-0 rounded-full bg-emerald-400/20 px-2.5 py-1 text-[10px] font-bold text-emerald-100">
                   AKTIF
                 </span>
-
-                <ChevronDown size={16} className="-rotate-90" />
               </div>
-            </button>
+            </div>
 
             {/* =================================================
-                MOBILE MENU
+                MOBILE NAVIGATION
             ================================================== */}
 
             <div className="space-y-1">
@@ -291,16 +361,18 @@ function UserNavbar() {
                   <NavLink
                     key={item.path}
                     to={item.path}
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={closeMobileMenu}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition ${
+                      [
+                        "flex items-center gap-3 rounded-xl px-4 py-3",
+                        "text-sm font-semibold transition-all duration-200",
                         isActive
-                          ? "bg-[#ffd51c] text-[#073b9e]"
-                          : "text-white hover:bg-white/10"
-                      }`
+                          ? "bg-[#ffd51c] text-[#073b9e] shadow-sm"
+                          : "text-white hover:bg-white/10",
+                      ].join(" ")
                     }
                   >
-                    <Icon size={18} />
+                    <Icon size={18} strokeWidth={2.2} />
 
                     <span>{item.name}</span>
                   </NavLink>
@@ -309,16 +381,25 @@ function UserNavbar() {
             </div>
 
             {/* =================================================
-                PROFILE BUTTON
+                PROFILE
             ================================================== */}
 
             <button
               type="button"
               onClick={handleProfile}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/15"
+              className="mt-3 flex w-full items-center gap-3 rounded-xl bg-white/10 px-4 py-3 text-left text-sm font-bold text-white transition hover:bg-white/15"
             >
-              <UserRound size={17} />
-              Profil Saya
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
+                <UserRound size={17} />
+              </div>
+
+              <div>
+                <p>Profil Saya</p>
+
+                <p className="text-[10px] font-normal text-blue-100">
+                  Lihat data diri
+                </p>
+              </div>
             </button>
 
             {/* =================================================
@@ -331,6 +412,7 @@ function UserNavbar() {
               className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-red-500/15 px-4 py-3 text-sm font-bold text-red-100 transition hover:bg-red-500/25"
             >
               <LogOut size={17} />
+
               Keluar
             </button>
           </div>
@@ -341,8 +423,8 @@ function UserNavbar() {
           MOBILE BOTTOM NAVIGATION
       ====================================================== */}
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-blue-900/20 bg-[#073b9e] shadow-[0_-4px_20px_rgba(15,23,42,0.15)] lg:hidden">
-        <div className="grid h-[68px] grid-cols-5">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-blue-900/20 bg-[#073b9e] shadow-[0_-4px_20px_rgba(15,23,42,0.15)] lg:hidden">
+        <div className="mx-auto grid h-[68px] max-w-[700px] grid-cols-5">
           {menu.map((item) => {
             const Icon = item.icon;
 
@@ -350,10 +432,15 @@ function UserNavbar() {
               <NavLink
                 key={item.path}
                 to={item.path}
+                onClick={closeMobileMenu}
                 className={({ isActive }) =>
-                  `relative flex flex-col items-center justify-center gap-1 transition ${
-                    isActive ? "text-[#ffd51c]" : "text-blue-100/70"
-                  }`
+                  [
+                    "relative flex flex-col items-center justify-center",
+                    "gap-1 transition-all duration-200",
+                    isActive
+                      ? "text-[#ffd51c]"
+                      : "text-blue-100/70 hover:text-white",
+                  ].join(" ")
                 }
               >
                 {({ isActive }) => (
@@ -367,17 +454,26 @@ function UserNavbar() {
                     {/* ICON */}
 
                     <div
-                      className={`flex h-8 w-8 items-center justify-center rounded-xl ${
-                        isActive ? "bg-[#ffd51c]/15" : ""
-                      }`}
+                      className={[
+                        "flex h-8 w-8 items-center justify-center rounded-xl",
+                        "transition-all duration-200",
+                        isActive
+                          ? "bg-[#ffd51c]/15"
+                          : "",
+                      ].join(" ")}
                     >
-                      <Icon size={19} />
+                      <Icon
+                        size={19}
+                        strokeWidth={
+                          isActive ? 2.5 : 2
+                        }
+                      />
                     </div>
 
                     {/* LABEL */}
 
                     <span className="text-center text-[10px] font-semibold leading-none">
-                      {item.name === "Rekam Presensi" ? "Presensi" : item.name}
+                      {item.shortName}
                     </span>
                   </>
                 )}

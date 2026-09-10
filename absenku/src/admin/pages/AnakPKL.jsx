@@ -23,7 +23,7 @@ const wfhOptions = [
 const emptyForm = {
   nama: "",
   nis: "",
-  foto: "",
+  password: "",
   kelas: "",
   sekolah: "",
   jurusan: "",
@@ -92,7 +92,8 @@ export default function AnakPKL() {
     if (
       !form.nama.trim() ||
       !form.nis.trim() ||
-      !form.kelas.trim()
+      !form.kelas.trim() ||
+      !form.password.trim()
     ) {
       return;
     }
@@ -117,7 +118,7 @@ export default function AnakPKL() {
     setForm({
       nama: student.nama || "",
       nis: student.nis || "",
-      foto: student.foto || "",
+      password: student.password || "",
       kelas: student.kelas || "",
       sekolah: student.sekolah || "",
       jurusan: student.jurusan || "",
@@ -137,7 +138,8 @@ export default function AnakPKL() {
       !editingStudent ||
       !form.nama.trim() ||
       !form.nis.trim() ||
-      !form.kelas.trim()
+      !form.kelas.trim() ||
+      !form.password.trim()
     ) {
       return;
     }
@@ -311,16 +313,19 @@ export default function AnakPKL() {
               className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-blue-500"
             />
 
-            {/* FOTO */}
+            {/* PASSWORD */}
             <input
-              value={form.foto}
+              required
+              type="password"
+              value={form.password}
               onChange={(event) =>
                 setForm({
                   ...form,
-                  foto: event.target.value,
+                  password: event.target.value,
                 })
               }
-              placeholder="URL foto siswa"
+              placeholder="Password"
+              autoComplete="new-password"
               className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-blue-500"
             />
           </div>
@@ -705,16 +710,19 @@ export default function AnakPKL() {
                 className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-blue-500"
               />
 
-              {/* FOTO */}
+              {/* PASSWORD */}
               <input
-                value={form.foto}
+                required
+                type="password"
+                value={form.password}
                 onChange={(event) =>
                   setForm({
                     ...form,
-                    foto: event.target.value,
+                    password: event.target.value,
                   })
                 }
-                placeholder="URL foto siswa"
+                placeholder="Password"
+                autoComplete="new-password"
                 className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-blue-500 sm:col-span-2"
               />
 
